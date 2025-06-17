@@ -1,66 +1,94 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  TextInput, // Import TextInput
+} from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import Funcionario from '../types/Funcionario';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../api/api'; // Verifique se o caminho para 'api' está correto
+import api from '../api/api';
 import { isAxiosError } from 'axios';
 
 export default function Funcionarios() {
   const navigation = useNavigation();
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
   const router = useRouter();
 
   const JWT_TOKEN_KEY = '@MyApp:jwtToken';
-  const REMEMBERED_EMAIL_KEY = '@MyApp:rememberedEmail'; // Chave para o e-mail lembrado
+  const REMEMBERED_EMAIL_KEY = '@MyApp:rememberedEmail';
 
   const carregarFuncionarios = async () => {
     setLoading(true);
-    console.log('[Funcionarios] Iniciando carregamento de funcionários...'); // Log 1
+    console.log('[Funcionarios] Iniciando carregamento de funcionários...');
 
     try {
       const tokenCheck = await AsyncStorage.getItem(JWT_TOKEN_KEY);
-      console.log('[Funcionarios] Token existe no AsyncStorage para esta sessão:', tokenCheck ? 'SIM' : 'NÃO'); // Log 2
+      console.log(
+        '[Funcionarios] Token existe no AsyncStorage para esta sessão:',
+        tokenCheck ? 'SIM' : 'NÃO'
+      );
 
       const response = await api.get('/ponto');
-      console.log('[Funcionarios] Resposta da API recebida!'); // Log 3
-      console.log('[Funcionarios] Status da Resposta:', response.status); // Log 4: CRÍTICO
-      console.log('[Funcionarios] Dados da Resposta:', response.data); // Log 5: CRÍTICO
+      console.log('[Funcionarios] Resposta da API recebida!');
+      console.log('[Funcionarios] Status da Resposta:', response.status);
+      console.log('[Funcionarios] Dados da Resposta:', response.data);
 
       if (response.data && Array.isArray(response.data)) {
         setFuncionarios(response.data);
-        console.log('[Funcionarios] Funcionários definidos no estado. Total:', response.data.length); // Log 6
+        console.log(
+          '[Funcionarios] Funcionários definidos no estado. Total:',
+          response.data.length
+        );
       } else {
-        console.warn('[Funcionarios] Resposta da API não é um array como esperado:', response.data);
+        console.warn(
+          '[Funcionarios] Resposta da API não é um array como esperado:',
+          response.data
+        );
         Alert.alert('Erro', 'Formato de dados inesperado da API.');
       }
-
     } catch (error: any) {
-      console.error('[Funcionarios] Erro capturado na função carregarFuncionarios:', error); // Log 7
+      console.error('[Funcionarios] Erro capturado na função carregarFuncionarios:', error);
       let errorMessage = 'Não foi possível carregar os funcionários.';
 
       if (isAxiosError(error)) {
-        console.error('[Funcionarios] Detalhes do erro Axios:', error); // Log 8: Loga o erro completo do Axios
+        console.error('[Funcionarios] Detalhes do erro Axios:', error);
         if (error.response) {
-          console.error('[Funcionarios] Erro Status:', error.response.status); // Log 9
-          console.error('[Funcionarios] Erro Data:', error.response.data); // Log 10
+          console.error('[Funcionarios] Erro Status:', error.response.status);
+          console.error('[Funcionarios] Erro Data:', error.response.data);
           if (error.response.status === 403) {
             errorMessage = 'Você não tem permissão para visualizar esta lista.';
-          } else if (error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
-            errorMessage = (error.response.data as { message?: string }).message || `Erro do servidor: ${error.response.status}`;
+          } else if (
+            error.response.data &&
+            typeof error.response.data === 'object' &&
+            'message' in error.response.data
+          ) {
+            errorMessage =
+              (error.response.data as { message?: string }).message ||
+              `Erro do servidor: ${error.response.status}`;
           } else {
             errorMessage = `Erro do servidor: ${error.response.status}`;
           }
         } else if (error.request) {
-          console.error('[Funcionarios] Erro de Requisição (sem resposta do servidor):', error.request); // Log 11
+          console.error(
+            '[Funcionarios] Erro de Requisição (sem resposta do servidor):',
+            error.request
+          );
           errorMessage = 'Servidor não respondeu. Verifique sua conexão ou o IP da API.';
         } else {
-          console.error('[Funcionarios] Erro na configuração da requisição:', error.message); // Log 12
+          console.error('[Funcionarios] Erro na configuração da requisição:', error.message);
           errorMessage = 'Ocorreu um erro ao configurar a requisição. Tente novamente.';
         }
       } else if (error instanceof Error) {
-        console.error('[Funcionarios] Erro padrão:', error.message); // Log 13
+        console.error('[Funcionarios] Erro padrão:', error.message);
         errorMessage = error.message;
       }
       Alert.alert('Erro', errorMessage);
@@ -82,7 +110,7 @@ export default function Funcionarios() {
           onPress={async () => {
             try {
               await AsyncStorage.removeItem(JWT_TOKEN_KEY);
-              await AsyncStorage.removeItem(REMEMBERED_EMAIL_KEY); // Remove também o e-mail lembrado
+              await AsyncStorage.removeItem(REMEMBERED_EMAIL_KEY);
               router.replace('/login');
             } catch (error) {
               console.error('Erro ao fazer logout:', error);
@@ -102,6 +130,10 @@ export default function Funcionarios() {
     });
   }
 
+  const filteredFuncionarios = funcionarios.filter((funcionario) =>
+    funcionario.nome.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -113,11 +145,21 @@ export default function Funcionarios() {
 
   return (
     <View style={styles.container}>
-      {funcionarios.length === 0 ? (
-        <Text style={styles.noDataText}>Nenhum funcionário encontrado ou erro ao carregar.</Text>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Pesquisar por nome..."
+        value={searchText}
+        onChangeText={setSearchText}
+      />
+      {filteredFuncionarios.length === 0 ? (
+        <Text style={styles.noDataText}>
+          {searchText
+            ? 'Nenhum funcionário encontrado com este nome.'
+            : 'Nenhum funcionário encontrado ou erro ao carregar.'}
+        </Text>
       ) : (
         <FlatList
-          data={funcionarios}
+          data={filteredFuncionarios}
           keyExtractor={(item) => item.id!.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.item} onPress={() => abrirDetalhes(item)}>
@@ -127,10 +169,7 @@ export default function Funcionarios() {
           )}
         />
       )}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => router.push('/novo-funcionario')}
-      >
+      <TouchableOpacity style={styles.fab} onPress={() => router.push('/novo-funcionario')}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
@@ -143,6 +182,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    marginBottom: 12,
   },
   item: {
     flexDirection: 'row',

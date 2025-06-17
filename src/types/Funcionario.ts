@@ -1,9 +1,10 @@
-interface Funcionario {
-  id?: number;
+
+export interface Funcionario {
+  id: number;
   nome: string;
   email: string;
-  senha: string;
-  administrador: boolean;
+  administrador: boolean; 
+  pontos?: string[];
 }
 
 export default Funcionario;
