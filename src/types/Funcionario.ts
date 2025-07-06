@@ -5,6 +5,7 @@ export interface Funcionario {
   email: string;
   administrador: boolean; 
   pontos?: string[];
+  senha: string;
 }
 
 export default Funcionario;

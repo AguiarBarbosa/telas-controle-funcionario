@@ -6,16 +6,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/api';
 import { isAxiosError } from 'axios';
 
-// Importe a interface Funcionario se você a definiu em um arquivo separado, por exemplo:
-// import { Funcionario } from '../types/Funcionario';
-
-// Se não definiu em um arquivo separado, pode definir aqui mesmo para este componente:
 interface FuncionarioLogadoData {
   id: number;
   nome: string;
   email: string;
-  administrador: boolean; // Adicione esta propriedade
-  // Quaisquer outros campos que você salva no AsyncStorage
+  administrador: boolean; 
 }
 
 export default function BaterPontoScreen() {
@@ -45,8 +40,7 @@ export default function BaterPontoScreen() {
 
         setFuncionarioLogado(userData);
         
-        // Opcional: Buscar os detalhes completos do funcionário para pegar os pontos
-        // Esta chamada ainda é importante para exibir a "Última batida"
+
         const response = await api.get(`/ponto/${userData.id}`);
         if (response.data && response.data.pontos && response.data.pontos.length > 0) {
           const pontos = response.data.pontos;
@@ -158,11 +152,11 @@ export default function BaterPontoScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* NOVO BOTÃO CONDICIONAL PARA ADMINISTRADORES */}
+
           {funcionarioLogado.administrador && (
             <TouchableOpacity
               style={styles.adminButton}
-              onPress={() => router.push('/funcionarios')} // Redireciona para /funcionarios
+              onPress={() => router.push('/funcionarios')}
               disabled={loading}
             >
               <Text style={styles.adminButtonText}>Ver Funcionários</Text>

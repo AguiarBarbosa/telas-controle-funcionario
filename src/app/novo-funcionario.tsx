@@ -7,6 +7,7 @@ import { isAxiosError } from 'axios';
 
 export default function NovoFuncionario() {
   const [form, setForm] = useState<Funcionario>({
+    id: 0,
     nome: '',
     email: '',
     senha: '',
@@ -23,20 +24,20 @@ export default function NovoFuncionario() {
   }, []);
 
   const salvarFuncionario = async () => {
-    // --- INÍCIO DA VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS ---
+  
     if (!form.nome.trim()) {
       Alert.alert('Erro', 'Por favor, preencha o campo Nome.');
-      return; // Interrompe a execução se o campo estiver vazio
+      return;
     }
     if (!form.email.trim()) {
       Alert.alert('Erro', 'Por favor, preencha o campo E-mail.');
-      return; // Interrompe a execução se o campo estiver vazio
+      return; 
     }
     if (!form.senha.trim()) {
       Alert.alert('Erro', 'Por favor, preencha o campo Senha.');
-      return; // Interrompe a execução se o campo estiver vazio
+      return;
     }
-    // --- FIM DA VALIDAÇÃO ---
+
 
     try {
       const response = await api.post('/ponto', form);

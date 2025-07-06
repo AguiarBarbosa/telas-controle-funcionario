@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react'; // Importe useCallback
-import { View, Alert, Text, ActivityIndicator, StyleSheet, Button } from 'react-native'; // Removidos TextInput, Button, Switch
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Alert, Text, ActivityIndicator, StyleSheet, Button } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import Funcionario from '../types/Funcionario';
 import api from '../api/api';
 import { isAxiosError } from 'axios';
-import FuncionarioForm from '../components/FuncionarioForms'; // Importe o novo componente
+import FuncionarioForm from '../components/FuncionarioForms';
 
-// Define a interface para o estado do formulário de edição
 interface FuncionarioFormState {
   nome: string;
   email: string;
@@ -35,7 +34,7 @@ export default function FuncionarioDetalhes() {
     });
   }, [navigation]);
 
-  // Handler para atualizar os campos do formulário
+
   const handleFormChange = useCallback((field: keyof FuncionarioFormState, value: string | boolean) => {
     setFuncionarioForm(prevForm => ({
       ...prevForm,
@@ -43,7 +42,7 @@ export default function FuncionarioDetalhes() {
     }));
   }, []);
 
-  // Função para carregar os detalhes do funcionário
+
   const carregarFuncionario = useCallback(async () => {
     if (!id) {
       Alert.alert('Erro', 'ID do funcionário não fornecido.');
@@ -95,14 +94,14 @@ export default function FuncionarioDetalhes() {
     } finally {
       setLoading(false);
     }
-  }, [id, router]); // Adicionado 'id' e 'router' às dependências de useCallback
+  }, [id, router]);
 
-  // Carrega o funcionário quando o ID muda
+
   useEffect(() => {
     carregarFuncionario();
-  }, [carregarFuncionario]); // Dependência da função carregarFuncionario
+  }, [carregarFuncionario]);
 
-  // Função para salvar as alterações do funcionário
+
   const salvarAlteracoes = useCallback(async () => {
     if (!funcionarioOriginal || !id) return;
 
@@ -153,9 +152,9 @@ export default function FuncionarioDetalhes() {
     } finally {
       setLoading(false);
     }
-  }, [funcionarioForm, funcionarioOriginal, id, router]); // Adicionado dependências
+  }, [funcionarioForm, funcionarioOriginal, id, router]);
 
-  // Função para confirmar a exclusão antes de prosseguir
+
   const confirmarExclusao = useCallback(() => {
     Alert.alert(
       "Confirmar Exclusão",
@@ -173,9 +172,9 @@ export default function FuncionarioDetalhes() {
       ],
       { cancelable: true }
     );
-  }, [funcionarioForm.nome]); // Dependência do nome para o alerta
+  }, [funcionarioForm.nome]);
 
-  // Função para excluir o funcionário
+
   const excluirFuncionario = useCallback(async () => {
     if (!id) {
         Alert.alert('Erro', 'ID do funcionário não fornecido para exclusão.');
@@ -218,9 +217,7 @@ export default function FuncionarioDetalhes() {
     } finally {
       setLoading(false);
     }
-  }, [id, router]); // Dependências de id e router
-
-  // Exibe indicador de carregamento
+  }, [id, router]);
   if (loading) {
     return (
       <View style={localStyles.loadingContainer}>
@@ -230,7 +227,7 @@ export default function FuncionarioDetalhes() {
     );
   }
 
-  // Exibe mensagem se o funcionário não for encontrado após carregar
+
   if (!funcionarioOriginal) {
     return (
       <View style={localStyles.loadingContainer}>
@@ -240,18 +237,17 @@ export default function FuncionarioDetalhes() {
     );
   }
 
-  // Renderiza o formulário de detalhes/edição usando o novo componente
   return (
     <FuncionarioForm
       formData={funcionarioForm}
       onFormChange={handleFormChange}
       onSave={salvarAlteracoes}
-      onConfirmDelete={confirmarExclusao} // Passa a função de confirmação de exclusão
+      onConfirmDelete={confirmarExclusao}
     />
   );
 }
 
-// Estilos que pertencem a FuncionarioDetalhes (principalmente estados de carregamento)
+
 const localStyles = StyleSheet.create({
   loadingContainer: {
     flex: 1,

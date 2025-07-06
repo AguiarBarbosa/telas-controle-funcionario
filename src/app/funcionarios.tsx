@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  TextInput, // Import TextInput
+  TextInput,
 } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import Funcionario from '../types/Funcionario';
